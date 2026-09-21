@@ -55,5 +55,4 @@ workflows:
         # privada (Apple Business Manager) — no por aquí.
       email:
         recipients:
-          - itapia@clickbi.cl
           - bgonzalezc@clickbi.cl
