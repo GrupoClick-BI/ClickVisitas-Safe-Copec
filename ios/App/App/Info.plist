@@ -76,5 +76,7 @@
 	<string>Safe CRM accede a tu fototeca para adjuntar imágenes a las gestiones y casos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Safe CRM puede guardar imágenes descargadas en tu fototeca.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
