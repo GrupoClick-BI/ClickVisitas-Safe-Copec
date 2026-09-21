@@ -56,3 +56,4 @@ workflows:
       email:
         recipients:
           - itapia@clickbi.cl
+          - bgonzalezc@clickbi.cl
