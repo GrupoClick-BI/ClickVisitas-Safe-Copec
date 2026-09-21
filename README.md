@@ -71,6 +71,8 @@ y sirven para justificar el acceso al código fuente:
 | 6 | **Push notifications** | No hay avisos de nuevos casos/gestiones — requiere integración server-side con APNs. |
 | 7 | **Offline / sin señal** | La app queda en blanco — no hay service worker ni caché (la PWA del sitio está incompleta). |
 | 8 | **Notch / safe area** | El viewport actual no usa `viewport-fit=cover`; puede verse con bandas en iPhones con notch. |
+| 9 | **Layout de login en pantallas angostas** (confirmado en TestFlight build 1) | Los campos Usuario/Password se ven cortados por el lado izquierdo (muestran "...iano" / "...word" en vez del texto completo). El sitio no tiene un diseño responsive real para móvil — pasaría igual en Safari, no es un bug del wrapper. |
+| 10 | **Sesión se cierra sola** (confirmado en TestFlight build 1) | Tras iniciar sesión, la app vuelve a pedir login poco después. Probable causa: cookie de sesión sin `Max-Age`/`Expires`, o `SameSite` restrictivo que WKWebView trata distinto que Safari. |
 
 ## Qué corregir una vez tengan el código
 
