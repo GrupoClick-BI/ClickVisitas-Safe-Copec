@@ -1,0 +1,18 @@
+{
+  "appId": "cl.clickbi.safecopec",
+  "appName": "Safe CRM",
+  "webDir": "www",
+  "server": {
+    "url": "https://safe-copec.clickbi.cl",
+    "allowNavigation": [
+      "safe-copec.clickbi.cl",
+      "*.clickbi.cl"
+    ]
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": true,
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
