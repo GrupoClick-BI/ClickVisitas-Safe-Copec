@@ -4,9 +4,10 @@
 #   1. Subir este proyecto a un repo git (GitHub/GitLab/Bitbucket) y conectarlo
 #      a Codemagic (Add application).
 #   2. En Codemagic → Teams/Personal → Integrations → App Store Connect:
-#      crear una API key en App Store Connect (Users and Access → Keys) con rol
-#      Developer/App Manager y registrar la integración con nombre
-#      "app_store_connect" (usado abajo en auth: integration).
+#      reutiliza la integración "clickbi-appstore" (ya registrada para otros
+#      proyectos de ClickBI, ver mobile_meli/codemagic.yaml) o crea una API key
+#      en App Store Connect (Users and Access → Keys) con rol Developer/App
+#      Manager y regístrala con ese mismo nombre.
 #   3. Codemagic gestiona certificados y provisioning automáticamente
 #      (ios_signing + xcode-project use-profiles).
 #
@@ -26,7 +27,7 @@ workflows:
       node: "22"
       xcode: latest
     integrations:
-      app_store_connect: app_store_connect
+      app_store_connect: clickbi-appstore
     ios_signing:
       distribution_type: app_store
       bundle_identifier: $BUNDLE_ID
