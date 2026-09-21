@@ -1,15 +1,8 @@
 # Codemagic CI/CD — build iOS de Safe CRM (wrapper Capacitor)
 #
-# Preparación:
-#   1. Subir este proyecto a un repo git (GitHub/GitLab/Bitbucket) y conectarlo
-#      a Codemagic (Add application).
-#   2. En Codemagic → Teams/Personal → Integrations → App Store Connect:
-#      reutiliza la integración "clickbi-appstore" (ya registrada para otros
-#      proyectos de ClickBI, ver mobile_meli/codemagic.yaml) o crea una API key
-#      en App Store Connect (Users and Access → Keys) con rol Developer/App
-#      Manager y regístrala con ese mismo nombre.
-#   3. Codemagic gestiona certificados y provisioning automáticamente
-#      (ios_signing + xcode-project use-profiles).
+# Firma manual vía App Store Connect API, igual que mobile_meli/codemagic.yaml
+# (ese enfoque es el que probadamente funciona para las apps de ClickBI —
+# el signing automático de Codemagic con "ios_signing:" dio problemas acá).
 #
 # Cada build genera un .ipa y lo sube a TestFlight automáticamente.
 
@@ -18,26 +11,38 @@ workflows:
     name: Safe CRM iOS
     instance_type: mac_mini_m2
     max_build_duration: 60
+    integrations:
+      app_store_connect: clickbi-appstore
     environment:
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
-        XCODE_WORKSPACE: "ios/App/App.xcodeproj/project.xcworkspace"
         XCODE_SCHEME: "App"
         BUNDLE_ID: "cl.clickbi.safecopec"
       node: "22"
       xcode: latest
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: $BUNDLE_ID
-    integrations:
-      app_store_connect: clickbi-appstore
     scripts:
       - name: Dependencias npm
         script: npm install
       - name: Sync Capacitor a iOS
         script: npx cap sync ios
-      - name: Perfiles de firma (App Store Connect)
-        script: xcode-project use-profiles
+      - name: Set up code signing
+        script: |
+          keychain initialize
+
+          openssl genrsa -out /tmp/cert-key.pem 2048
+
+          app-store-connect certificates create \
+            --type IOS_DISTRIBUTION \
+            --certificate-key @file:/tmp/cert-key.pem \
+            --save
+
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key @file:/tmp/cert-key.pem \
+            --create
+
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Build IPA
         script: |
           xcode-project build-ipa \
