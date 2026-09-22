@@ -14,8 +14,25 @@ dentro de un WKWebView. No hay código web local salvo un `www/index.html` de re
   - `NSLocationWhenInUseUsageDescription` (georreferencia de gestiones)
   - `NSCameraUsageDescription` (fotos de evidencia)
   - `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription`
-- Plugins instalados: app, browser, camera, filesystem, geolocation, keyboard,
-  push-notifications, share, splash-screen, status-bar.
+- Plugins instalados (Capacitor 8):
+  - `@capacitor/app` — estado del ciclo de vida (foreground/background) y manejo
+    de deep links de retorno.
+  - `@capacitor/browser` — abre links externos (Mesa de Ayuda, Google Maps) en
+    Safari en vez de romper la navegación dentro del WKWebView.
+  - `@capacitor/camera` — fotos de evidencia en gestiones (requiere
+    `NSCameraUsageDescription`).
+  - `@capacitor/filesystem` — guardar a disco los Excel/CSV/PDF de DataTables,
+    que en WKWebView no caen solos (ver checklist punto 3).
+  - `@capacitor/geolocation` — georreferencia de gestiones (requiere
+    `NSLocationWhenInUseUsageDescription`).
+  - `@capacitor/keyboard` — ajustar el viewport cuando aparece el teclado nativo.
+  - `@capacitor/push-notifications` — base para avisos de nuevos casos/gestiones
+    (pendiente integración server-side con APNs, ver checklist punto 6).
+  - `@capacitor/share` — hoja de compartir nativa para los archivos exportados
+    (Excel/CSV/PDF) una vez guardados con filesystem.
+  - `@capacitor/splash-screen` — pantalla de carga nativa mientras el WKWebView
+    carga el sitio remoto.
+  - `@capacitor/status-bar` — color/estilo de la barra de estado acorde al sitio.
 
 ## Requisitos para compilar
 
@@ -48,13 +65,16 @@ En Xcode:
 
 ## Build en Codemagic (alternativa sin Mac propio)
 
-El proyecto incluye `codemagic.yaml` listo para Codemagic:
+El proyecto incluye `codemagic.yaml` con dos workflows:
 
-1. Subir el proyecto a un repo git y conectarlo en Codemagic.
-2. Crear una API key en App Store Connect (Users and Access → Keys) y registrar
-   la integración **"app_store_connect"** en Codemagic — así la firma es
-   automática (certificados + provisioning).
-3. Cada build produce el `.ipa` y lo sube directo a **TestFlight**.
+- **`ios-safe-crm`**: firma automática vía App Store Connect API. Sube el
+  proyecto a un repo git, conéctalo en Codemagic, crea una API key en App
+  Store Connect (Users and Access → Keys) y registra la integración
+  **"app_store_connect"** en Codemagic. Cada build produce el `.ipa` y lo sube
+  directo a **TestFlight**.
+- **`android-safe-crm`**: build debug sin firma (no requiere cuenta de
+  desarrollador). Cada build agrega la plataforma Android si falta, sincroniza
+  Capacitor y genera un `.apk` instalable directo para pruebas.
 
 ## Checklist de fallos esperados (evidencia para pedir el código)
 

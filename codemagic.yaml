@@ -1,12 +1,46 @@
-# Codemagic CI/CD — build iOS de Safe CRM (wrapper Capacitor)
+# Codemagic CI/CD — build iOS/Android de Safe CRM (wrapper Capacitor)
 #
-# Firma manual vía App Store Connect API, igual que mobile_meli/codemagic.yaml
+# iOS: firma manual vía App Store Connect API, igual que mobile_meli/codemagic.yaml
 # (ese enfoque es el que probadamente funciona para las apps de ClickBI —
 # el signing automático de Codemagic con "ios_signing:" dio problemas acá).
+# Cada build de iOS genera un .ipa y lo sube a TestFlight automáticamente.
 #
-# Cada build genera un .ipa y lo sube a TestFlight automáticamente.
+# Android: build debug (sin firma), igual que mobile_meli/codemagic.yaml.
+# Genera un .apk instalable directo para pruebas.
 
 workflows:
+  android-safe-crm:
+    name: Safe CRM Android
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: "22"
+      java: 17
+      vars:
+        PACKAGE_NAME: "cl.clickbi.safecopec"
+    scripts:
+      - name: Dependencias npm
+        script: npm install
+      - name: Agregar plataforma Android si falta
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Sync Capacitor a Android
+        script: npx cap sync android
+      - name: Permisos de gradlew
+        script: chmod +x android/gradlew
+      - name: Build APK Android (debug)
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+    publishing:
+      email:
+        recipients:
+          - bgonzalezc@clickbi.cl
+
   ios-safe-crm:
     name: Safe CRM iOS
     instance_type: mac_mini_m2

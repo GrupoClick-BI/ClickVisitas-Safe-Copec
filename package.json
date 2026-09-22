@@ -5,13 +5,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync": "cap sync ios",
-    "open": "cap open ios"
+    "open": "cap open ios",
+    "sync:android": "cap sync android",
+    "open:android": "cap open android"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Wrapper Capacitor iOS para Safe CRM (safe-copec.clickbi.cl)",
+  "description": "Wrapper Capacitor iOS/Android para Safe CRM (safe-copec.clickbi.cl)",
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
     "@capacitor/app": "^8.1.1",
     "@capacitor/browser": "^8.0.4",
     "@capacitor/camera": "^8.2.4",
