@@ -14,6 +14,7 @@ dentro de un WKWebView. No hay código web local salvo un `www/index.html` de re
   - `NSLocationWhenInUseUsageDescription` (georreferencia de gestiones)
   - `NSCameraUsageDescription` (fotos de evidencia)
   - `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription`
+  - `NSMicrophoneUsageDescription` (grabación de audio en gestiones/casos)
 - Plugins instalados (Capacitor 8):
   - `@capacitor/app` — estado del ciclo de vida (foreground/background) y manejo
     de deep links de retorno.
@@ -74,7 +75,13 @@ El proyecto incluye `codemagic.yaml` con dos workflows:
   directo a **TestFlight**.
 - **`android-safe-crm`**: build debug sin firma (no requiere cuenta de
   desarrollador). Cada build agrega la plataforma Android si falta, sincroniza
-  Capacitor y genera un `.apk` instalable directo para pruebas.
+  Capacitor y genera un `.apk` instalable directo para pruebas. La carpeta
+  `android/` no está versionada (se regenera en cada build): los permisos de
+  ubicación/cámara/medios llegan solos al mergear los manifests de los
+  plugins instalados (`geolocation`, `camera`, `filesystem`), pero
+  `RECORD_AUDIO` / `MODIFY_AUDIO_SETTINGS` no vienen de ningún plugin, así
+  que el workflow incluye un paso que los parchea a mano en el
+  `AndroidManifest.xml` recién generado.
 
 ## Checklist de fallos esperados (evidencia para pedir el código)
 

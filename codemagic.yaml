@@ -28,6 +28,12 @@ workflows:
           fi
       - name: Sync Capacitor a Android
         script: npx cap sync android
+      - name: Agregar permisos de audio al manifest
+        script: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if ! grep -q "RECORD_AUDIO" "$MANIFEST"; then
+            sed -i '' 's#<uses-permission android:name="android.permission.CAMERA" />#<uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />#' "$MANIFEST"
+          fi
       - name: Permisos de gradlew
         script: chmod +x android/gradlew
       - name: Build APK Android (debug)

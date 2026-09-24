@@ -76,6 +76,8 @@
 	<string>Safe CRM accede a tu fototeca para adjuntar imágenes a las gestiones y casos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Safe CRM puede guardar imágenes descargadas en tu fototeca.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Safe CRM usa el micrófono para grabar audio dentro de las gestiones y casos.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
