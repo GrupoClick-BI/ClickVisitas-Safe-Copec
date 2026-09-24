@@ -3,7 +3,12 @@
 # iOS: firma manual vía App Store Connect API, igual que mobile_meli/codemagic.yaml
 # (ese enfoque es el que probadamente funciona para las apps de ClickBI —
 # el signing automático de Codemagic con "ios_signing:" dio problemas acá).
-# Cada build de iOS genera un .ipa y lo sube a TestFlight automáticamente.
+# El certificado de distribución se REUTILIZA desde la variable de entorno
+# IOS_CERTIFICATE_PRIVATE_KEY (grupo "ios_signing") en vez de crear uno nuevo
+# en cada build — antes agotaba los 3 certificados de distribución de Apple.
+# Ver NEW_PROJECT_CHECKLIST.md en PROYECTOS/_templates/capacitor-wrapper/.
+# El build number se calcula solo (get-latest-build-number + agvtool), no se
+# edita a mano. Cada build de iOS genera un .ipa y lo sube a TestFlight.
 #
 # Android: build debug (sin firma), igual que mobile_meli/codemagic.yaml.
 # Genera un .apk instalable directo para pruebas.
@@ -54,10 +59,13 @@ workflows:
     integrations:
       app_store_connect: clickbi-appstore
     environment:
+      groups:
+        - ios_signing
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
         BUNDLE_ID: "cl.clickbi.safecopec"
+        APP_STORE_APPLE_ID: "6814484016"
       node: "22"
       xcode: latest
     scripts:
@@ -69,13 +77,20 @@ workflows:
         script: |
           keychain initialize
 
-          openssl genrsa -out /tmp/cert-key.pem 2048
+          # Reutiliza el certificado guardado en la variable de entorno
+          # IOS_CERTIFICATE_PRIVATE_KEY (grupo "ios_signing"). Si todavía no
+          # existe (primer run / bootstrap), genera uno nuevo — ver el paso
+          # "Bootstrap: exportar llave" más abajo para guardarlo una sola vez.
+          if [ -n "$IOS_CERTIFICATE_PRIVATE_KEY" ]; then
+            echo "$IOS_CERTIFICATE_PRIVATE_KEY" | base64 -d > /tmp/cert-key.pem
+          else
+            openssl genrsa -out /tmp/cert-key.pem 2048
+          fi
 
-          app-store-connect certificates create \
-            --type IOS_DISTRIBUTION \
-            --certificate-key @file:/tmp/cert-key.pem \
-            --save
-
+          # fetch-signing-files reutiliza el certificado existente que calce
+          # con esta llave; solo crea uno nuevo si --create y no hay ninguno.
+          # NO llamar a "certificates create" acá: eso crea uno nuevo SIEMPRE
+          # y fue lo que agotó los 3 certificados de distribución de Apple.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --certificate-key @file:/tmp/cert-key.pem \
@@ -83,6 +98,20 @@ workflows:
 
           keychain add-certificates
           xcode-project use-profiles
+      - name: "Bootstrap: exportar llave (borrar tras guardar IOS_CERTIFICATE_PRIVATE_KEY)"
+        script: |
+          if [ -z "$IOS_CERTIFICATE_PRIVATE_KEY" ]; then
+            base64 -i /tmp/cert-key.pem -o "$CM_BUILD_DIR/cert-key.pem.b64"
+            echo "Descarga cert-key.pem.b64 de los artifacts y guárdalo como"
+            echo "variable de entorno segura IOS_CERTIFICATE_PRIVATE_KEY"
+            echo "(grupo ios_signing) en Codemagic. Luego borra este paso y"
+            echo "la línea de artifact cert-key.pem.b64 de este archivo."
+          fi
+      - name: Increment build number
+        script: |
+          cd ios/App
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-build-number "$APP_STORE_APPLE_ID" || echo "0")
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
       - name: Build IPA
         script: |
           xcode-project build-ipa \
@@ -91,6 +120,7 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
+      - cert-key.pem.b64 # bootstrap: borrar esta línea tras guardar IOS_CERTIFICATE_PRIVATE_KEY
     publishing:
       app_store_connect:
         auth: integration

@@ -68,22 +68,22 @@ En Xcode:
 
 ## Build en Codemagic (alternativa sin Mac propio)
 
-El proyecto incluye `codemagic.yaml` con dos workflows:
+`codemagic.yaml` — dos workflows:
 
-- **`ios-safe-crm`**: firma automática vía App Store Connect API. Sube el
-  proyecto a un repo git, conéctalo en Codemagic, crea una API key en App
-  Store Connect (Users and Access → Keys) y registra la integración
-  **"app_store_connect"** en Codemagic. Cada build produce el `.ipa` y lo sube
-  directo a **TestFlight**.
-- **`android-safe-crm`**: build debug sin firma (no requiere cuenta de
-  desarrollador). Cada build agrega la plataforma Android si falta, sincroniza
-  Capacitor y genera un `.apk` instalable directo para pruebas. La carpeta
-  `android/` no está versionada (se regenera en cada build): los permisos de
-  ubicación/cámara/medios llegan solos al mergear los manifests de los
-  plugins instalados (`geolocation`, `camera`, `filesystem`), pero
-  `RECORD_AUDIO` / `MODIFY_AUDIO_SETTINGS` no vienen de ningún plugin, así
-  que el workflow incluye un paso que los parchea a mano en el
-  `AndroidManifest.xml` recién generado.
+- `ios-safe-crm` — firma vía App Store Connect API, sube directo a TestFlight.
+- `android-safe-crm` — build debug sin firma, genera un `.apk` para pruebas.
+
+### Setup único de firma iOS (`ios_signing`)
+
+El certificado de distribución se reutiliza entre builds (no se crea uno
+nuevo cada vez — eso agotaba los 3 certificados de Apple). Setup de una sola
+vez, ya hecho para este proyecto:
+
+- Grupo de variables en Codemagic: `ios_signing`
+- Variable: `IOS_CERTIFICATE_PRIVATE_KEY` (segura, contenido del artifact
+  `cert-key.pem.b64` del primer build "bootstrap")
+
+Detalle completo del proceso: `PROYECTOS/_templates/capacitor-wrapper/NEW_PROJECT_CHECKLIST.md`.
 
 ## Checklist de fallos esperados (evidencia para pedir el código)
 
