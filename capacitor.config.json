@@ -6,7 +6,9 @@
     "url": "https://safe-copec.clickbi.cl",
     "allowNavigation": [
       "safe-copec.clickbi.cl",
-      "*.clickbi.cl"
+      "*.clickbi.cl",
+      "soporte.grupo-click.cl",
+      "*.grupo-click.cl"
     ]
   },
   "ios": {

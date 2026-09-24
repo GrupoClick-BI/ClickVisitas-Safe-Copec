@@ -7,8 +7,10 @@ dentro de un WKWebView. No hay código web local salvo un `www/index.html` de re
 ## Qué incluye
 
 - `capacitor.config.json` — `server.url` apuntando al sitio; `allowNavigation`
-  solo permite dominios `*.clickbi.cl` dentro del webview (todo lo externo —Mesa de
-  Ayuda, Google Maps— abre en Safari).
+  permite dominios `*.clickbi.cl` y `*.grupo-click.cl` dentro del webview (el
+  flujo de solicitud de acceso/soporte vive en `soporte.grupo-click.cl` — no
+  hay auto-registro, las cuentas se piden ahí). Todo lo demás externo —Google
+  Maps, etc.— abre en Safari.
 - Proyecto iOS generado en `ios/` (Xcode project listo).
 - `Info.plist` con permisos declarados:
   - `NSLocationWhenInUseUsageDescription` (georreferencia de gestiones)
